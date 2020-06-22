@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+require("console.table");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -11,12 +12,18 @@ var connection = mysql.createConnection({
   password: "Rk9006695!",
   database: "EmployeeTrackerDB"
 });
+connection.connect(function (error) {
+    if (error) {
+        console.log(error);
+    }
+    start()
+})
 
 function start() {
     inquirer
     .prompt({
       name: "start",
-      type: "list",
+      type: "rawlist",
       message: "What would you like to do?",
       choices: [
           "View all employees",
@@ -53,8 +60,121 @@ function start() {
                 updateManager();
                 break;
             case "Exit":
-                end();
-                break;             
+                connection.end()           
         }
       });
 }
+
+function viewEmployees() {
+    let statement = connection.query(`
+    SELECT employee.id, employee.first_name, employee. last_name, role.title, department.name, role.salary,employee.manager_id 
+    FROM employee, role, department
+    `, 
+    function (error, results) {
+        console.table(results);
+        start()
+     })
+     console.log(statement.sql);
+}
+
+function viewDepartment() {
+    let statement = connection.query(`
+    SELECT employee.id, employee.first_name, employee. last_name, role.title, department.name, role.salary,employee.manager_id 
+    FROM employee, role, department ORDER BY department.name
+    `, 
+    function (error, results) {
+        console.table(results);
+        start()
+     })
+     console.log(statement.sql);
+}
+
+function viewManager() {
+    let statement = connection.query(`
+    SELECT employee.id, employee.first_name, employee. last_name, role.title, department.name, role.salary,employee.manager_id 
+    FROM employee, role, department ORDER BY employee.manager_id
+    `, 
+    function (error, results) {
+        console.table(results);
+        start()
+     })
+     console.log(statement.sql);
+}
+
+function addEmployee() {
+    inquirer
+        .prompt([{
+            name: "first",
+            type: "input",
+            message: "What is the employee's first name?"
+        },
+            {
+                name: "last",
+                type: "input",
+                message: "What is the employee's last name?"
+            },
+            {
+                name: "role",
+                type: "input",
+                message: "What is the employee's role?"
+            },
+            {
+                name: "manager",
+                type: "input",
+                message: "Who is the employee's manager?"
+            }])
+            .then(function(answer) {
+                let connection.query(' INSERT INTO employee SET ?',
+                {
+                    first_name: answer.first,
+                    last_name: answer.last,
+                    role_id: answer.role,
+                    manager_id: answer.manger
+                })
+            })
+
+}
+
+function removeEmployee() {
+    inquirer
+        .prompt([{
+            name: "startyear",
+            type: "input",
+            message: "What start year would you like to search for?"
+        },
+            {
+                name: "endyear",
+                type: "input",
+                message: "What end year would you like to search for?"
+            }])
+
+}
+function updateRole() {
+    inquirer
+        .prompt([{
+            name: "startyear",
+            type: "input",
+            message: "What start year would you like to search for?"
+        },
+            {
+                name: "endyear",
+                type: "input",
+                message: "What end year would you like to search for?"
+            }])
+
+}
+
+function updateManager() {
+    inquirer
+        .prompt([{
+            name: "startyear",
+            type: "input",
+            message: "What start year would you like to search for?"
+        },
+            {
+                name: "endyear",
+                type: "input",
+                message: "What end year would you like to search for?"
+            }])
+}
+
