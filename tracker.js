@@ -3,14 +3,14 @@ const inquirer = require("inquirer");
 require("console.table");
 
 var connection = mysql.createConnection({
-  host: "localhost",
+    host: "localhost",
 
-  port: 3306,
+    port: 3306,
 
-  user: "root",
+    user: "root",
 
-  password: "Rk9006695!",
-  database: "EmployeeTrackerDB"
+    password: "Rk9006695!",
+    database: "EmployeeTrackerDB"
 });
 connection.connect(function (error) {
     if (error) {
@@ -21,82 +21,95 @@ connection.connect(function (error) {
 
 function start() {
     inquirer
-    .prompt({
-      name: "start",
-      type: "rawlist",
-      message: "What would you like to do?",
-      choices: [
-          "View all employees",
-          "View all employees by Department",
-          "View all employees by Manager",
-          "Add an employee",
-          "Remove an employee",
-          "Update employee Role",
-          "Update employee Manager",
-          "Exit"
-        ]
-    })
-    .then(function(answer) {
-        switch (answer.start) {
-            case "View all employees":
-                viewEmployees();
-                break;
-            case "View all employees by Department":
-                viewDepartment();
-                break;
-            case "View all employees by Manager":
-                viewManager();
-                break;
-            case "Add an employee":
-                addEmployee();
-                break;
-            case "Remove an employee":
-                removeEmployee();
-                break;
-            case "Update employee Role":
-                updateRole();
-                break;
-            case "Update employee Manager":
-                updateManager();
-                break;
-            case "Exit":
-                connection.end()           
-        }
-      });
+        .prompt({
+            name: "start",
+            type: "rawlist",
+            message: "What would you like to do?",
+            choices: [
+                "View all employees",
+                "View all employees by Department",
+                "View all employees by Manager",
+                "Add an employee",
+                "Remove an employee",
+                "Update employee Role",
+                "Update employee Manager",
+                "Exit"
+            ]
+        })
+        .then(function (answer) {
+            switch (answer.start) {
+                case "View all employees":
+                    viewEmployees();
+                    break;
+                case "View all employees by Department":
+                    viewDepartment();
+                    break;
+                case "View all employees by Manager":
+                    viewManager();
+                    break;
+                case "Add an employee":
+                    addEmployee();
+                    break;
+                case "Remove an employee":
+                    removeEmployee();
+                    break;
+                case "Update employee Role":
+                    updateRole();
+                    break;
+                case "Update employee Manager":
+                    updateManager();
+                    break;
+                case "Exit":
+                    connection.end()
+            }
+        });
 }
 
 function viewEmployees() {
     let statement = connection.query(`
-    SELECT first_name, last_name, role.title, role.salary, department.name FROM employee
+    SELECT first_name, last_name, role.title, role.salary, department.name 
+    FROM employee
     INNER JOIN department 
     ON department.id = employee.role_id
     LEFT JOIN role
-    ON role.id = employee.role_id `, 
-    function (error, results) {
-        console.table(results);
-        start()
-     })
-     //console.log(statement.sql);
+    ON role.id = employee.role_id `,
+        function (error, results) {
+            console.table(results);
+            start()
+        })
+    //console.log(statement.sql);
 }
 
 function viewDepartment() {
     let statement = connection.query(`
-    SELECT employee.id, employee.first_name, employee. last_name, role.title, department.name, role.salary,employee.manager_id FROM employee, role, department ORDER BY department.name`, function (error, results) 
-    {
+    SELECT first_name, last_name, role.title, role.salary, department.name 
+    FROM employee 
+    INNER JOIN department 
+    ON department.id = employee.role_id
+    LEFT JOIN role
+    ON role.id = employee.role_id
+    ORDER BY department.name`, 
+function (error, results) {
         console.table(results);
         start()
-     })
-     console.log(statement.sql);
+    })
+    console.log(statement.sql);
 }
 
 function viewManager() {
     let statement = connection.query(`
-    SELECT employee.id, employee.first_name, employee. last_name, role.title, department.name, role.salary,employee.manager_id FROM employee, role, department ORDER BY employee.manager_id`, 
-    function (error, results) {
-        console.table(results);
-        start()
-     })
-     console.log(statement.sql);
+    SELECT first_name, last_name, role.title, role.salary, department.name 
+    FROM employee 
+    INNER JOIN department 
+    ON department.id = employee.role_id
+    LEFT JOIN role
+    ON role.id = employee.role_id 
+    ORDER BY employee.manager_id`,
+        function (error, results) {
+            console.table(results);
+            start()
+        })
+    console.log(statement.sql);
 }
 
 // function addEmployee() {
@@ -107,7 +120,7 @@ function viewManager() {
 //         for (let i = 0; i < results.length; i++) {
 //             manNames.push(`${results[i].first_name} ${results[i].last_name}`)
 //         }
-    
+
 //     inquirer
 //         .prompt([{
 //             name: "first",
