@@ -30,7 +30,10 @@ function start() {
                 "View all employees",
                 "View all employees by Department",
                 "View all employees by Manager",
+                "View all employees by Role",
                 "Add an employee",
+                "Add an Department",
+                "Add an Role",
                 "Remove an employee",
                 "Update employee Role",
                 "Update employee Manager",
@@ -47,6 +50,9 @@ function start() {
                     break;
                 case "View all employees by Manager":
                     viewManager();
+                    break;
+                case "View all employees by Role":
+                    viewRole();
                     break;
                 case "Add an employee":
                     addEmployee();
@@ -67,7 +73,7 @@ function start() {
 }
 
 function viewEmployees() {
-    let statement = connection.query(`
+    connection.query(`
     SELECT first_name, last_name, role.title, role.salary, department.name 
     FROM employee
     INNER JOIN department 
@@ -81,7 +87,7 @@ function viewEmployees() {
 }
 
 function viewDepartment() {
-    let statement = connection.query(`
+    connection.query(`
     SELECT first_name, last_name, role.title, role.salary, department.name 
     FROM employee 
     INNER JOIN department 
@@ -97,7 +103,7 @@ function viewDepartment() {
 }
 
 function viewManager() {
-    let statement = connection.query(`
+    connection.query(`
     SELECT first_name, last_name, role.title, role.salary, department.name 
     FROM employee 
     INNER JOIN department 
@@ -112,53 +118,68 @@ function viewManager() {
     console.log(statement.sql);
 }
 
-// function addEmployee() {
-//     connection.query(`SELECT employee.first_name, employee.last_name
-//     FROM employee WHERE manager_id = null`, function (error, results) {
-//         let manNames= [];
-//         console.table(results);
-//         for (let i = 0; i < results.length; i++) {
-//             manNames.push(`${results[i].first_name} ${results[i].last_name}`)
-//         }
+function addEmployee() {
+    connection.query(`SELECT employee.first_name, employee.last_name, id 
+    FROM employee`, function (error, results) {
+        let employees = [];
+        let emplid = [];
+        for (let i = 0; i < results.length; i++) {
+            employees.push(`${results[i].first_name} ${results[i].last_name}`);
+            emplid.push(results[i].id);
+        }
+        connection.query('SELECT role.title, role.id FROM role', function (error, results) {
+            let roles = [];
+            let roleids = [];
+            for (let i = 0; i < results.length; i++) {
+                roles.push(`${results[i].title}`);
+                roleids.push(results[i].id);
+            }
+            inquirer
+                .prompt([{
+                    name: "first",
+                    type: "input",
+                    message: "What is the employee's first name?"
+                },
+                {
+                    name: "last",
+                    type: "input",
+                    message: "What is the employee's last name?"
+                },
+                {
+                    name: "role",
+                    type: "list",
+                    message: "What is the employee's role?",
+                    choices: roles
+                },
+                {
+                    name: "manager",
+                    type: "list",
+                    message: "Who is the employee's manager?",
+                    choices: employees
+                }])
+                .then(function (answer) {
 
-//     inquirer
-//         .prompt([{
-//             name: "first",
-//             type: "input",
-//             message: "What is the employee's first name?"
-//         },
-//             {
-//                 name: "last",
-//                 type: "input",
-//                 message: "What is the employee's last name?"
-//             },
-//             {
-//                 name: "role",
-//                 type: "input",
-//                 message: "What is the employee's role?"
-//             },
-//             {
-//                 name: "manager",
-//                 type: "list",
-//                 message: "Who is the employee's manager?",
-//                 choices: manNames
-//             }])
-//             .then(function(answer) {
-//                 let statement= connection.query( "INSERT INTO employee SET ?",
-//                 {
-//                     first_name: answer.first,
-//                     last_name: answer.last}, "INNER JOIN role SET ?", {
-//                     title: answer.role
-//                     // manager_id: answer.manager
-//                 },
-//                 function(error) {
-//                     if (error) throw error;
-//                     console.log("The employee has been added to the database.");
-//                     start()  
-//                 });
-//             });
-//         });
-// }
+                    let newrole = answer.role;
+                    let roleind = roles.indexOf(newrole);
+                    let newman = answer.manager;
+                    let manind = employees.indexOf(newman);    
+
+                    connection.query("INSERT INTO employee SET ?",
+                        {
+                            first_name: answer.first,
+                            last_name: answer.last,
+                            role_id: roleids[roleind],
+                            manager_id: emplid[manind]
+                    },
+                        function (error) {
+                            if (error) throw error;
+                            console.log("The employee has been added to the database.");
+                            start()
+                        });
+                });
+        });
+    });
+}
 
 function removeEmployee() {
     connection.query(`SELECT employee.first_name, employee.last_name
@@ -232,41 +253,41 @@ function updateRole() {
     });
 }
 
-// function updateManager() {
-//         connection.query(`SELECT employee.first_name, employee.last_name, manager_id 
-//         FROM employee`, function (error, results) {
-//             let employees = [];
-//             for (let i = 0; i < results.length; i++) {
-//                 employees.push(`${results[i].first_name} ${results[i].last_name}`)
-//             }
-//         inquirer
-//             .prompt([
-//                 {
-//                 name: "selectemploy",
-//                 type: "list",
-//                 message: "Which employee's manager do you want to update?",
-//                 choices:[
-//                     employees
-//                 ]},
-//                 {
-//                 name: "selectman",
-//                 type: "list",
-//                 message: "Which employee do you want to set as manager for the selected employee?",
-//                 choices: [
-//                     roles
-//                 ]}
-//             ])
-//             .then(function(answer) {
-//                 let name = answer.selectemploy.split(" ");
-//                 let newman = answer.selectman;
-//                 let roleind = roles.indexOf(newman);
-//                 connection.query(`UPDATE employee SET manager_id  = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
-//                 function(error) {
-//                     if (error) throw error;
-//                     console.log("The employee has been updated");
-//                     start();
-//                 });
-//             });
-//         });
-//     }
+function updateManager() {
+    connection.query(`SELECT employee.first_name, employee.last_name, id 
+        FROM employee`, function (error, results) {
+        let employees = [];
+        let emplid = [];
+        for (let i = 0; i < results.length; i++) {
+            employees.push(`${results[i].first_name} ${results[i].last_name}`);
+            emplid.push(results[i].id);
+        }
+        inquirer
+            .prompt([
+                {
+                    name: "selectemploy",
+                    type: "list",
+                    message: "Which employee's manager do you want to update?",
+                    choices: employees
+                },
+                {
+                    name: "selectman",
+                    type: "list",
+                    message: "Which employee do you want to set as manager for the selected employee?",
+                    choices: employees
+                }
+            ])
+            .then(function (answer) {
+                let name = answer.selectemploy.split(" ");
+                let newman = answer.selectman;
+                let manind = employees.indexOf(newman);
+                connection.query(`UPDATE employee SET manager_id  = ${emplid[manind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                    function (error) {
+                        if (error) throw error;
+                        console.log("The employee's manager has been updated");
+                        start();
+                    });
+            });
+    });
+}
 
