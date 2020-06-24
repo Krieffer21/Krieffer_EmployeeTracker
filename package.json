@@ -1,0 +1,26 @@
+{
+  "name": "krieffer_employeetracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tracker.js",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^7.2.0",
+    "mysql": "^2.18.1",
+    "sql": "^0.78.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Krieffer21/Krieffer_EmployeeTracker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Krieffer21/Krieffer_EmployeeTracker/issues"
+  },
+  "homepage": "https://github.com/Krieffer21/Krieffer_EmployeeTracker#readme"
+}
