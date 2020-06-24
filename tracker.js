@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const { title } = require("process");
 require("console.table");
 
 var connection = mysql.createConnection({
@@ -77,7 +78,6 @@ function viewEmployees() {
             console.table(results);
             start()
         })
-    //console.log(statement.sql);
 }
 
 function viewDepartment() {
@@ -164,7 +164,6 @@ function removeEmployee() {
     connection.query(`SELECT employee.first_name, employee.last_name
     FROM employee`, function (error, results) {
         let employees= [];
-        console.table(results);
         for (let i = 0; i < results.length; i++) {
             employees.push(`${results[i].first_name} ${results[i].last_name}`)
         }
@@ -191,32 +190,87 @@ function removeEmployee() {
 }
 
 
-// function updateRole() {
-//     inquirer
-//         .prompt([{
-//             name: "startyear",
-//             type: "input",
-//             message: "What start year would you like to search for?"
-//         },
-//             {
-//                 name: "endyear",
-//                 type: "input",
-//                 message: "What end year would you like to search for?"
-//             }])
+function updateRole() {
+    connection.query(`SELECT employee.first_name, employee.last_name
+    FROM employee`, function (error, results) {
+        let employees = [];
+        for (let i = 0; i < results.length; i++) {
+            employees.push(`${results[i].first_name} ${results[i].last_name}`)
+        }
+    connection.query('SELECT role.title, role.id FROM role', function(error, results) {
+        let roles = [];
+        let roleids = [];
+        for (let i = 0; i < results.length; i++) {
+            roles.push(`${results[i].title}`);
+            roleids.push(results[i].id);
+        }
+    })
+    inquirer
+        .prompt([
+            {
+            name: "uprole",
+            type: "list",
+            message: "Who's role would you like to update?",
+            choices:[
+                employees
+            ]},
+            {
+            name: "newrole",
+            type: "list",
+            message: "What would you like as their new role?",
+            choices: [
+                roles
+            ]}
+        ])
+        .then(function(answer) {
+            let name = answer.uprole.split(" ");
+            let newrole = answer.newrole;
+            let roleind = roles.indexOf(newrole);
+            connection.query(`UPDATE employee SET role_id = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
+            function(error) {
+                if (error) throw error;
+                console.log("The employee has been updated");
+                start();
+            });
+        });
+    });
+}
 
-// }
-
-// function updateManager() {
-//     inquirer
-//         .prompt([{
-//             name: "startyear",
-//             type: "input",
-//             message: "What start year would you like to search for?"
-//         },
-//             {
-//                 name: "endyear",
-//                 type: "input",
-//                 message: "What end year would you like to search for?"
-//             }])
-// }
-
+function updateManager() {
+        connection.query(`SELECT employee.first_name, employee.last_name, manager_id 
+        FROM employee`, function (error, results) {
+            let employees = [];
+            for (let i = 0; i < results.length; i++) {
+                employees.push(`${results[i].first_name} ${results[i].last_name}`)
+            }
+        inquirer
+            .prompt([
+                {
+                name: "selectemploy",
+                type: "list",
+                message: "Which employee's manager do you want to update?",
+                choices:[
+                    employees
+                ]},
+                {
+                name: "selectman",
+                type: "list",
+                message: "Which employee do you want to set as manager for the selected employee?",
+                choices: [
+                    roles
+                ]}
+            ])
+            .then(function(answer) {
+                let name = answer.selectemploy.split(" ");
+                let newman = answer.selectman;
+                let roleind = roles.indexOf(newman);
+                connection.query(`UPDATE employee SET manager_id  = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
+                function(error) {
+                    if (error) throw error;
+                    console.log("The employee has been updated");
+                    start();
+                });
+            });
+        });
+    }
+    
