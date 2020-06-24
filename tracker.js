@@ -160,20 +160,37 @@ function viewManager() {
 //         });
 // }
 
-// function removeEmployee() {
-//     inquirer
-//         .prompt([{
-//             name: "rmEmployee",
-//             type: "list",
-//             message: "Which employee would you like to remove?"
-//         }
-//         choices: [
+function removeEmployee() {
+    connection.query(`SELECT employee.first_name, employee.last_name
+    FROM employee`, function (error, results) {
+        let employees= [];
+        console.table(results);
+        for (let i = 0; i < results.length; i++) {
+            employees.push(`${results[i].first_name} ${results[i].last_name}`)
+        }
+    inquirer
+        .prompt({
+            name: "rmEmployee",
+            type: "list",
+            message: "Which employee would you like to remove?",
+            choices:
+            [
+                employees
+            ]
+        })
+        .then(function(answer) {
+            let name = answer.rmEmployee.split(" ");
+            connection.query(`DELETE FROM employee WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
+            function(error) {
+                if (error) throw error;
+                console.log("The employee has been deleted");
+                start();
+            });
+        });
+    });
+}
 
-//         ]
 
-//             }])
-
-// }
 // function updateRole() {
 //     inquirer
 //         .prompt([{
