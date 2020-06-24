@@ -88,11 +88,11 @@ function viewDepartment() {
     ON department.id = employee.role_id
     LEFT JOIN role
     ON role.id = employee.role_id
-    ORDER BY department.name`, 
-function (error, results) {
-        console.table(results);
-        start()
-    })
+    ORDER BY department.name`,
+        function (error, results) {
+            console.table(results);
+            start()
+        })
     console.log(statement.sql);
 }
 
@@ -163,29 +163,27 @@ function viewManager() {
 function removeEmployee() {
     connection.query(`SELECT employee.first_name, employee.last_name
     FROM employee`, function (error, results) {
-        let employees= [];
+        let employees = [];
         for (let i = 0; i < results.length; i++) {
             employees.push(`${results[i].first_name} ${results[i].last_name}`)
         }
-    inquirer
-        .prompt({
-            name: "rmEmployee",
-            type: "list",
-            message: "Which employee would you like to remove?",
-            choices:
-            [
-                employees
-            ]
-        })
-        .then(function(answer) {
-            let name = answer.rmEmployee.split(" ");
-            connection.query(`DELETE FROM employee WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
-            function(error) {
-                if (error) throw error;
-                console.log("The employee has been deleted");
-                start();
+
+        inquirer
+            .prompt({
+                name: "rmEmployee",
+                type: "list",
+                message: "Which employee would you like to remove?",
+                choices: employees
+            })
+            .then(function (answer) {
+                let name = answer.rmEmployee.split(" ");
+                connection.query(`DELETE FROM employee WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                    function (error) {
+                        if (error) throw error;
+                        console.log("The employee has been deleted");
+                        start();
+                    });
             });
-        });
     });
 }
 
@@ -197,80 +195,78 @@ function updateRole() {
         for (let i = 0; i < results.length; i++) {
             employees.push(`${results[i].first_name} ${results[i].last_name}`)
         }
-    connection.query('SELECT role.title, role.id FROM role', function(error, results) {
-        let roles = [];
-        let roleids = [];
-        for (let i = 0; i < results.length; i++) {
-            roles.push(`${results[i].title}`);
-            roleids.push(results[i].id);
-        }
-    })
-    inquirer
-        .prompt([
-            {
-            name: "uprole",
-            type: "list",
-            message: "Who's role would you like to update?",
-            choices:[
-                employees
-            ]},
-            {
-            name: "newrole",
-            type: "list",
-            message: "What would you like as their new role?",
-            choices: [
-                roles
-            ]}
-        ])
-        .then(function(answer) {
-            let name = answer.uprole.split(" ");
-            let newrole = answer.newrole;
-            let roleind = roles.indexOf(newrole);
-            connection.query(`UPDATE employee SET role_id = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
-            function(error) {
-                if (error) throw error;
-                console.log("The employee has been updated");
-                start();
-            });
+        connection.query('SELECT role.title, role.id FROM role', function (error, results) {
+            let roles = [];
+            let roleids = [];
+            for (let i = 0; i < results.length; i++) {
+                roles.push(`${results[i].title}`);
+                roleids.push(results[i].id);
+            }
+            inquirer
+                .prompt([
+                    {
+                        name: "uprole",
+                        type: "list",
+                        message: "Who's role would you like to update?",
+                        choices: employees
+                    },
+                    {
+                        name: "newrole",
+                        type: "list",
+                        message: "What would you like as their new role?",
+                        choices: roles
+                    }
+                ])
+                .then(function (answer) {
+                    let name = answer.uprole.split(" ");
+                    let newrole = answer.newrole;
+                    let roleind = roles.indexOf(newrole);
+                    connection.query(`UPDATE employee SET role_id = ${roleids[roleind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                        function (error) {
+                            if (error) throw error;
+                            console.log("The employee has been updated");
+                            start();
+                        });
+                });
         });
     });
 }
 
-function updateManager() {
-        connection.query(`SELECT employee.first_name, employee.last_name, manager_id 
-        FROM employee`, function (error, results) {
-            let employees = [];
-            for (let i = 0; i < results.length; i++) {
-                employees.push(`${results[i].first_name} ${results[i].last_name}`)
-            }
-        inquirer
-            .prompt([
-                {
-                name: "selectemploy",
-                type: "list",
-                message: "Which employee's manager do you want to update?",
-                choices:[
-                    employees
-                ]},
-                {
-                name: "selectman",
-                type: "list",
-                message: "Which employee do you want to set as manager for the selected employee?",
-                choices: [
-                    roles
-                ]}
-            ])
-            .then(function(answer) {
-                let name = answer.selectemploy.split(" ");
-                let newman = answer.selectman;
-                let roleind = roles.indexOf(newman);
-                connection.query(`UPDATE employee SET manager_id  = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
-                function(error) {
-                    if (error) throw error;
-                    console.log("The employee has been updated");
-                    start();
-                });
-            });
-        });
-    }
-    
+// function updateManager() {
+//         connection.query(`SELECT employee.first_name, employee.last_name, manager_id 
+//         FROM employee`, function (error, results) {
+//             let employees = [];
+//             for (let i = 0; i < results.length; i++) {
+//                 employees.push(`${results[i].first_name} ${results[i].last_name}`)
+//             }
+//         inquirer
+//             .prompt([
+//                 {
+//                 name: "selectemploy",
+//                 type: "list",
+//                 message: "Which employee's manager do you want to update?",
+//                 choices:[
+//                     employees
+//                 ]},
+//                 {
+//                 name: "selectman",
+//                 type: "list",
+//                 message: "Which employee do you want to set as manager for the selected employee?",
+//                 choices: [
+//                     roles
+//                 ]}
+//             ])
+//             .then(function(answer) {
+//                 let name = answer.selectemploy.split(" ");
+//                 let newman = answer.selectman;
+//                 let roleind = roles.indexOf(newman);
+//                 connection.query(`UPDATE employee SET manager_id  = ${roleids[roleind]} WHERE first_name = ${name[0]} AND last_name = ${name[1]} `, 
+//                 function(error) {
+//                     if (error) throw error;
+//                     console.log("The employee has been updated");
+//                     start();
+//                 });
+//             });
+//         });
+//     }
+
