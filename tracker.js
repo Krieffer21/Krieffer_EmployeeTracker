@@ -57,6 +57,12 @@ function start() {
                 case "Add an employee":
                     addEmployee();
                     break;
+                case "Add an Department":
+                    addDepartment();
+                    break;
+                case "Add an Role":
+                    addRole();
+                    break;
                 case "Remove an employee":
                     removeEmployee();
                     break;
