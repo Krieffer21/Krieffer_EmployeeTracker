@@ -124,6 +124,23 @@ function viewManager() {
     console.log(statement.sql);
 }
 
+function viewRole() {
+    connection.query(`
+    SELECT first_name, last_name, role.title, role.salary, department.name 
+    FROM employee 
+    INNER JOIN department 
+    ON department.id = employee.role_id
+    LEFT JOIN role
+    ON role.id = employee.role_id
+    ORDER BY role.title`,
+        function (error, results) {
+            console.table(results);
+            start()
+        })
+    console.log(statement.sql);
+}
+
+
 function addEmployee() {
     connection.query(`SELECT employee.first_name, employee.last_name, id 
     FROM employee`, function (error, results) {
