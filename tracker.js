@@ -94,13 +94,8 @@ function viewEmployees() {
 
 function viewDepartment() {
     connection.query(`
-    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
-    FROM employee 
-    INNER JOIN department 
-    ON department.id = employee.role_id
-    LEFT JOIN role
-    ON role.id = employee.role_id
-    ORDER BY department.name`,
+    SELECT department.name, department.id 
+    FROM department `,
         function (error, results) {
             console.table(results);
             start()
@@ -124,13 +119,8 @@ function viewManager() {
 
 function viewRole() {
     connection.query(`
-    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
-    FROM employee 
-    INNER JOIN department 
-    ON department.id = employee.role_id
-    LEFT JOIN role
-    ON role.id = employee.role_id
-    ORDER BY role.title`,
+    SELECT role.title, role.id
+    FROM role`,
         function (error, results) {
             console.table(results);
             start()
@@ -175,7 +165,10 @@ function addEmployee() {
                     name: "manager",
                     type: "list",
                     message: "Who is the employee's manager?",
-                    choices: employees
+                    choices: [
+                    ...employees,
+                    "none"
+                     ]
                 }])
                 .then(function (answer) {
 
