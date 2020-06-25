@@ -32,8 +32,8 @@ function start() {
                 "View all employees by Manager",
                 "View all employees by Role",
                 "Add an employee",
-                "Add an Department",
-                "Add an Role",
+                "Add a Department",
+                "Add a Role",
                 "Remove an employee",
                 "Update employee Role",
                 "Update employee Manager",
@@ -57,10 +57,10 @@ function start() {
                 case "Add an employee":
                     addEmployee();
                     break;
-                case "Add an Department":
+                case "Add a Department":
                     addDepartment();
                     break;
-                case "Add an Role":
+                case "Add a Role":
                     addRole();
                     break;
                 case "Remove an employee":
@@ -79,8 +79,7 @@ function start() {
 }
 
 function viewEmployees() {
-    connection.query(`
-    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
+    connection.query(`SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee
     INNER JOIN department 
     ON department.id = employee.role_id
