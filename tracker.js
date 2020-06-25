@@ -28,9 +28,9 @@ function start() {
             message: "What would you like to do?",
             choices: [
                 "View all employees",
-                "View all employees by Department",
+                "View Departments",
                 "View all employees by Manager",
-                "View all employees by Role",
+                "View all Roles",
                 "Add an employee",
                 "Add a Department",
                 "Add a Role",
@@ -45,13 +45,13 @@ function start() {
                 case "View all employees":
                     viewEmployees();
                     break;
-                case "View all employees by Department":
+                case "View Departments":
                     viewDepartment();
                     break;
                 case "View all employees by Manager":
                     viewManager();
                     break;
-                case "View all employees by Role":
+                case "View all Roles":
                     viewRole();
                     break;
                 case "Add an employee":
@@ -81,10 +81,10 @@ function start() {
 function viewEmployees() {
     connection.query(`SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee
-    INNER JOIN department 
-    ON department.id = employee.role_id
-    LEFT JOIN role
-    ON role.id = employee.role_id `,
+    INNER JOIN role 
+    ON role.id = employee.role_id
+    INNER JOIN department
+    ON role.department_id = department.id `,
         function (error, results) {
             console.table(results);
             start()
@@ -105,10 +105,10 @@ function viewManager() {
     connection.query(`
     SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee 
-    INNER JOIN department 
-    ON department.id = employee.role_id
-    LEFT JOIN role
-    ON role.id = employee.role_id 
+    INNER JOIN role 
+    ON role.id = employee.role_id
+    INNER JOIN department
+    ON role.department_id = department.id 
     ORDER BY employee.manager_id`,
         function (error, results) {
             console.table(results);
