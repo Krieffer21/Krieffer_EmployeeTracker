@@ -80,7 +80,7 @@ function start() {
 
 function viewEmployees() {
     connection.query(`
-    SELECT first_name, last_name, role.title, role.salary, department.name 
+    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee
     INNER JOIN department 
     ON department.id = employee.role_id
@@ -94,7 +94,7 @@ function viewEmployees() {
 
 function viewDepartment() {
     connection.query(`
-    SELECT first_name, last_name, role.title, role.salary, department.name 
+    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id
@@ -105,12 +105,11 @@ function viewDepartment() {
             console.table(results);
             start()
         })
-    console.log(statement.sql);
 }
 
 function viewManager() {
     connection.query(`
-    SELECT first_name, last_name, role.title, role.salary, department.name 
+    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id
@@ -121,12 +120,11 @@ function viewManager() {
             console.table(results);
             start()
         })
-    console.log(statement.sql);
 }
 
 function viewRole() {
     connection.query(`
-    SELECT first_name, last_name, role.title, role.salary, department.name 
+    SELECT first_name, last_name, manager_id, role.title, role.salary, department.name 
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id
@@ -137,7 +135,6 @@ function viewRole() {
             console.table(results);
             start()
         })
-    console.log(statement.sql);
 }
 
 
@@ -185,7 +182,7 @@ function addEmployee() {
                     let newrole = answer.role;
                     let roleind = roles.indexOf(newrole);
                     let newman = answer.manager;
-                    let manind = employees.indexOf(newman);    
+                    let manind = employees.indexOf(newman);
 
                     connection.query("INSERT INTO employee SET ?",
                         {
@@ -193,7 +190,7 @@ function addEmployee() {
                             last_name: answer.last,
                             role_id: roleids[roleind],
                             manager_id: emplid[manind]
-                    },
+                        },
                         function (error) {
                             if (error) throw error;
                             console.log("The employee has been added to the database.");
@@ -204,113 +201,178 @@ function addEmployee() {
     });
 }
 
-function removeEmployee() {
-    connection.query(`SELECT employee.first_name, employee.last_name
-    FROM employee`, function (error, results) {
-        let employees = [];
-        for (let i = 0; i < results.length; i++) {
-            employees.push(`${results[i].first_name} ${results[i].last_name}`)
-        }
-
-        inquirer
-            .prompt({
-                name: "rmEmployee",
-                type: "list",
-                message: "Which employee would you like to remove?",
-                choices: employees
-            })
-            .then(function (answer) {
-                let name = answer.rmEmployee.split(" ");
-                connection.query(`DELETE FROM employee WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
-                    function (error) {
-                        if (error) throw error;
-                        console.log("The employee has been deleted");
-                        start();
-                    });
-            });
-    });
-}
-
-
-function updateRole() {
-    connection.query(`SELECT employee.first_name, employee.last_name
-    FROM employee`, function (error, results) {
-        let employees = [];
-        for (let i = 0; i < results.length; i++) {
-            employees.push(`${results[i].first_name} ${results[i].last_name}`)
-        }
-        connection.query('SELECT role.title, role.id FROM role', function (error, results) {
-            let roles = [];
-            let roleids = [];
-            for (let i = 0; i < results.length; i++) {
-                roles.push(`${results[i].title}`);
-                roleids.push(results[i].id);
-            }
-            inquirer
-                .prompt([
-                    {
-                        name: "uprole",
-                        type: "list",
-                        message: "Who's role would you like to update?",
-                        choices: employees
-                    },
-                    {
-                        name: "newrole",
-                        type: "list",
-                        message: "What would you like as their new role?",
-                        choices: roles
-                    }
-                ])
-                .then(function (answer) {
-                    let name = answer.uprole.split(" ");
-                    let newrole = answer.newrole;
-                    let roleind = roles.indexOf(newrole);
-                    connection.query(`UPDATE employee SET role_id = ${roleids[roleind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
-                        function (error) {
-                            if (error) throw error;
-                            console.log("The employee has been updated");
-                            start();
-                        });
+function addDepartment() {
+    inquirer
+        .prompt({
+            name: "depart",
+            type: "input",
+            message: "What Department would you like to add?"
+        })
+        .then(function (answer) {
+            connection.query("INSERT INTO department SET ?",
+                {
+                    name: answer.depart
+                },
+                function (error) {
+                    if (error) throw error;
+                    console.log("The department has been added.");
+                    start()
                 });
         });
-    });
 }
 
-function updateManager() {
-    connection.query(`SELECT employee.first_name, employee.last_name, id 
-        FROM employee`, function (error, results) {
-        let employees = [];
-        let emplid = [];
+function addRole() {
+    connection.query('SELECT department.name, department.id FROM department', function (error, results) {
+        let departnames = [];
+        let departids = [];
         for (let i = 0; i < results.length; i++) {
-            employees.push(`${results[i].first_name} ${results[i].last_name}`);
-            emplid.push(results[i].id);
+            departnames.push(`${results[i].name}`);
+            departids.push(results[i].id);
         }
         inquirer
             .prompt([
                 {
-                    name: "selectemploy",
-                    type: "list",
-                    message: "Which employee's manager do you want to update?",
-                    choices: employees
+                    name: "role",
+                    type: "input",
+                    message: "What Role would you like to add?"
                 },
                 {
-                    name: "selectman",
+                    name: "salary",
+                    type: "input",
+                    message: "What is the salary for this role?"
+                },
+                {
+                    name: "department",
                     type: "list",
-                    message: "Which employee do you want to set as manager for the selected employee?",
-                    choices: employees
+                    message: "What Department is this role under?",
+                    choices: departnames
                 }
             ])
             .then(function (answer) {
-                let name = answer.selectemploy.split(" ");
-                let newman = answer.selectman;
-                let manind = employees.indexOf(newman);
-                connection.query(`UPDATE employee SET manager_id  = ${emplid[manind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                let newdepart = answer.department;
+                let departind = departnames.indexOf(newdepart);
+                connection.query("INSERT INTO role SET ?",
+                    {
+                        title: answer.role,
+                        salary: answer.salary,
+                        department_id: departids[departind]
+                    },
                     function (error) {
                         if (error) throw error;
-                        console.log("The employee's manager has been updated");
-                        start();
+                        console.log("The Role has been added.");
+                        start()
                     });
             });
     });
 }
+
+function removeEmployee() {
+            connection.query(`SELECT employee.first_name, employee.last_name
+    FROM employee`, function (error, results) {
+                let employees = [];
+                for (let i = 0; i < results.length; i++) {
+                    employees.push(`${results[i].first_name} ${results[i].last_name}`)
+                }
+
+                inquirer
+                    .prompt({
+                        name: "rmEmployee",
+                        type: "list",
+                        message: "Which employee would you like to remove?",
+                        choices: employees
+                    })
+                    .then(function (answer) {
+                        let name = answer.rmEmployee.split(" ");
+                        connection.query(`DELETE FROM employee WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                            function (error) {
+                                if (error) throw error;
+                                console.log("The employee has been deleted");
+                                start();
+                            });
+                    });
+            });
+        }
+
+
+function updateRole() {
+            connection.query(`SELECT employee.first_name, employee.last_name
+    FROM employee`, function (error, results) {
+                let employees = [];
+                for (let i = 0; i < results.length; i++) {
+                    employees.push(`${results[i].first_name} ${results[i].last_name}`)
+                }
+                connection.query('SELECT role.title, role.id FROM role', function (error, results) {
+                    let roles = [];
+                    let roleids = [];
+                    for (let i = 0; i < results.length; i++) {
+                        roles.push(`${results[i].title}`);
+                        roleids.push(results[i].id);
+                    }
+                    inquirer
+                        .prompt([
+                            {
+                                name: "uprole",
+                                type: "list",
+                                message: "Who's role would you like to update?",
+                                choices: employees
+                            },
+                            {
+                                name: "newrole",
+                                type: "list",
+                                message: "What would you like as their new role?",
+                                choices: roles
+                            }
+                        ])
+                        .then(function (answer) {
+                            let name = answer.uprole.split(" ");
+                            let newrole = answer.newrole;
+                            let roleind = roles.indexOf(newrole);
+                            connection.query(`UPDATE employee SET role_id = ${roleids[roleind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                                function (error) {
+                                    if (error) throw error;
+                                    console.log("The employee has been updated");
+                                    start();
+                                });
+                        });
+                });
+            });
+        }
+
+function updateManager() {
+            connection.query(`SELECT employee.first_name, employee.last_name, id 
+        FROM employee`, function (error, results) {
+                let employees = [];
+                let emplid = [];
+                for (let i = 0; i < results.length; i++) {
+                    employees.push(`${results[i].first_name} ${results[i].last_name}`);
+                    emplid.push(results[i].id);
+                }
+                inquirer
+                    .prompt([
+                        {
+                            name: "selectemploy",
+                            type: "list",
+                            message: "Which employee's manager do you want to update?",
+                            choices: employees
+                        },
+                        {
+                            name: "selectman",
+                            type: "list",
+                            message: "Which employee do you want to set as manager for the selected employee?",
+                            choices: employees
+                        }
+                    ])
+                    .then(function (answer) {
+                        let name = answer.selectemploy.split(" ");
+                        let newman = answer.selectman;
+                        let manind = employees.indexOf(newman);
+                        connection.query(`UPDATE employee SET manager_id  = ${emplid[manind]} WHERE first_name = '${name[0]}' AND last_name = '${name[1]}' `,
+                            function (error) {
+                                if (error) throw error;
+                                console.log("The employee's manager has been updated");
+                                start();
+                            });
+                    });
+            });
+        }
 
