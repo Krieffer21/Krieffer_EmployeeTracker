@@ -14,11 +14,11 @@
 ![](https://github.com/Krieffer21/Krieffer_EmployeeTracker/blob/master/Assets/addRD2.gif)
 
 ### New Employee
-  The gif below shows the process of adding a new employee.
+  The gif below shows the process of adding a new employee. Then seeing that the new employee has been added.
   
 ![](https://github.com/Krieffer21/Krieffer_EmployeeTracker/blob/master/Assets/addE3.gif)
 
 ### Other Features
-  The gif below displays the remaining functionallity of the other features, such as removing an employee and the two update features, as well as the exit option. 
+  The gif below displays the remaining features of the application, such as removing an employee and the two update features, as well as the exit option. 
   
 ![](https://github.com/Krieffer21/Krieffer_EmployeeTracker/blob/master/Assets/final4.gif)
